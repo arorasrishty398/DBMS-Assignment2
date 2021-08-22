@@ -1,0 +1,106 @@
+/*
+return Shopper’s information along with number of orders he/she placed during last 30 days.
+*/
+
+SELECT
+    user.*, count(user.user_id) AS no_of_orders
+FROM
+    user
+        INNER JOIN
+    orders ON user.user_id = orders.user_id
+WHERE
+    DATEDIFF(orders.order_date, now()) < 30
+GROUP BY user.user_id;
+
+/*
+return the top 10 Shoppers who generated maximum number of revenue in last 30 days.
+*/
+SELECT
+    user.name
+FROM
+    user
+        INNER JOIN
+    (SELECT
+        orders.user_id
+    FROM
+        orders
+    WHERE
+        DATEDIFF(orders.order_date, now()) < 30
+    GROUP BY orders.user_id
+    ORDER BY orders.order_total DESC
+    LIMIT 10) AS result ON user.user_id = result.user_id;
+
+/* retrun top 20 Products which are ordered most in last 60 days along with numbers.
+*/
+SELECT
+    p.name, r.no_of_orders
+FROM
+    products p
+        INNER JOIN
+    (SELECT
+        od.product_id, count(od.product_id) AS no_of_orders
+    FROM
+        order_details od,orders o
+    WHERE od.order_id = o.order_id AND
+        DATEDIFF(o.order_date, now()) < 60
+    GROUP BY od.product_id) AS r ON p.product_id = r.product_id
+ORDER BY r.no_of_orders DESC
+LIMIT 20;
+
+/return Monthly sales revenue of the StoreFront for last 6 months. It should display each month’s sale./
+SELECT
+CASE
+WHEN result.month = 3 THEN 'march'
+ELSE 'no'
+END AS month, result.revenue
+FROM
+(SELECT EXTRACT(MONTH FROM o.order_date) 
+AS month,sum(o.order_total) AS revenue  
+FROM orders o 
+GROUP BY month) 
+AS result;
+
+
+/*Mark the products as Inactive which are not ordered in last 90 days. */
+SELECT p.name,
+        CASE 
+            WHEN DATEDIFF(result.order_date,now()) > 90 THEN 'inactive' 
+            ELSE 'active' 
+            END AS status 
+            FROM products p LEFT JOIN (
+            SELECT o.order_date , od.product_id 
+            FROM order_details od INNER JOIN
+                orders o 
+            ON o.order_id = od.order_id) AS result 
+            ON result.product_id = p.product_id;
+            
+
+/*Given a category search keyword, display all the Products present in this category/categories. */
+SELECT
+    p.name, p.price, p.description
+FROM
+    products p INNER JOIN
+    categories c INNER JOIN
+    product_category pc
+WHERE
+    p.product_id = pc.product_id AND 
+    c.category_id = pc.category_id AND 
+        c.category_name = 'cosmetics';
+        
+/return the top 10 Items which were cancelled most./    
+SELECT
+    p.name
+FROM
+    products p
+        INNER JOIN
+    (SELECT 
+        od.product_id, count(od.product_id) AS count
+    FROM
+        order_details od
+    WHERE
+        od.cancelled = 1
+    GROUP BY od.product_id) AS r
+WHERE
+    r.product_id = p.product_id
+ORDER BY r.count DESC
+LIMIT 10;

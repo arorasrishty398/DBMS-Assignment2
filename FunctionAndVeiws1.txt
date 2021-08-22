@@ -1,0 +1,54 @@
+/*
+return the list of products (Id, Title, Count of Categories) which fall in more than one Categories.
+*/
+SELECT
+    products.product_id AS Id,
+    products.name AS Title,
+    result.category_count AS CountofCategories
+FROM
+    products INNER JOIN 
+            (SELECT product_id,
+             count(category_id) AS category_count
+            FROM
+            product_category 
+            GROUP BY product_id) AS result
+        ON products.product_id = result.product_id AND result.category_count > 1;
+        
+
+
+/*
+Count of products as per below price range
+return the Count of products as per below price range:
+Range in Rs.  Count
+0 - 100
+101 - 500
+Above 500
+*/
+SELECT
+  CASE
+    WHEN price BETWEEN 0 AND 100 THEN '0-100'
+    WHEN price BETWEEN 101 AND 500 THEN '101-500'
+    ELSE 'above 500'
+    END AS `Range in Rs.`,
+    count(1) AS `Count of products`
+FROM products
+GROUP BY `Range in Rs.`;
+
+
+/*
+return the Categories along with number of products under each category
+*/
+SELECT 
+    c.category_name, result.No_of_products
+FROM
+    categories c
+        INNER JOIN
+    (SELECT 
+        pc.category_id, 
+        count(p.product_id)  AS no_of_products
+    FROM
+        product_category pc
+    INNER JOIN products p 
+    ON pc.product_id = p.product_id 
+    GROUP BY pc.category_id) AS result 
+    ON c.category_id = result.category_id;

@@ -1,0 +1,115 @@
+/*
+creating database
+*/
+CREATE DATABASE zip_codes;
+USE zip_codes;
+
+/*
+creating required tables
+*/
+CREATE TABLE states(
+    id int PRIMARY KEY AUTO_INCREMENT,
+    name varchar(20)
+);
+
+
+CREATE TABLE cities(
+    id int PRIMARY KEY AUTO_INCREMENT,
+    name varchar(20),
+    state_id int,
+    foreign key (state_id)
+        references states (id)
+);
+
+
+CREATE TABLE zip_codes(
+    zipcode int PRIMARY KEY,
+    city_id int,
+    foreign key (city_id)
+        references cities(id)
+);
+
+/*
+inserting data in states table
+*/
+
+INSERT INTO states
+    (name) 
+    VALUES("Rajasthan");
+INSERT INTO states
+    (name) 
+    VALUES("Gujrat");
+INSERT INTO states
+    (name) 
+    VALUES("Maharashtra");
+
+/*
+inserting data in cities table
+*/
+INSERT INTO cities
+    (name,state_id) 
+    Values("jaipur",(SELECT state_id FROM states WHERE name = 'Rajasthan'));
+INSERT INTO cities
+    (name,state_id) 
+    Values("udaipur",(SELECT state_id FROM states WHERE name = 'Rajasthan'));
+INSERT INTO cities
+    (name,state_id) 
+    Values("banswara",(SELECT state_id FROM states WHERE name = 'Rajasthan'));
+INSERT INTO cities
+    (name,state_id) 
+    Values("ahemdabad",(SELECT state_id FROM states WHERE name = 'Gujrat'));
+INSERT INTO cities
+    (name,state_id) 
+    Values("surat",(SELECT state_id FROM states WHERE name = 'Gujrat'));
+INSERT INTO cities
+    (name,state_id) 
+    Values("rajkot",(SELECT state_id FROM states WHERE name = 'Gujrat'));
+INSERT INTO cities
+    (name,state_id) 
+    Values("mumbai",(SELECT state_id FROM states WHERE name = 'Maharashtra'));
+INSERT INTO cities
+    (name,state_id) 
+    Values("pune",(SELECT state_id FROM states WHERE name = 'Maharashtra'));
+
+/*
+inserting data in zipCodes table
+*/
+INSERT INTO zip_codes
+    (zipcode,city_id) 
+    Values(302001,(SELECT state_id FROM states WHERE name = 'jaipur'));
+INSERT INTO zip_codes
+    (zipcode,city_id) 
+    Values(313001,(SELECT state_id FROM states WHERE name = 'udaipur'));
+INSERT INTO zip_codes
+    (zipcode,city_id) 
+    Values(327001,(SELECT state_id FROM states WHERE name = 'banswara'));
+INSERT INTO zip_codes
+    (zipcode,city_id) 
+    Values(380001,(SELECT state_id FROM states WHERE name = 'ahemdabad'));
+INSERT INTO zip_codes
+    (zipcode,city_id) 
+    Values(395003,(SELECT state_id FROM states WHERE name = 'surat'));
+INSERT INTO zip_codes
+    (zipcode,city_id)
+    Values(360001,(SELECT state_id FROM states WHERE name = 'rajkot'));
+INSERT INTO zip_codes
+    (zipcode,city_id)
+    Values(400008,(SELECT state_id FROM states WHERE name = 'mumbai'));
+INSERT INTO zip_codes
+    (zipcode,city_id) 
+    Values(411001,(SELECT state_id FROM states WHERE name = 'pune'));
+
+/*
+return Zip Code, City Names and
+States ordered by State Name and City Name.
+*/
+SELECT
+    zip_codes.zipcode AS "Zip code", cities.name AS city_name, states.name AS state_name
+FROM
+    zip_codes INNER JOIN
+    cities INNER JOIN
+    states 
+ON
+    zip_codes.city_id = cities.id AND
+    cities.state_id =  states .id 
+    ORDER BY state_name AND city_name;

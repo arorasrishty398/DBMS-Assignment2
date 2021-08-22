@@ -1,0 +1,62 @@
+/*
+Create a view displaying the order information (Id, Title, Price, Shopper’s name, Email, Orderdate, Status) 
+with latest ordered items should be displayed first for last 60 days.
+*/
+USE zip_codes;
+Use storefront;
+CREATE VIEW order_information AS 
+SELECT 
+    p.product_id AS Id,
+    p.name AS Title,
+    p.price AS Price,
+    u.name AS ShoppersName,
+    u.email AS Email,
+    o.order_date AS Orderdate,
+    CASE
+        WHEN od.shipped = 1 THEN 'shipped'
+        ELSE 'processed'
+    END AS Status
+FROM
+    products p INNER JOIN
+    user u INNER JOIN
+    orders o INNER JOIN
+    order_details od
+ON
+    o.order_id = od.order_id AND 
+    od.product_id = p.product_id AND
+    o.user_id = u.user_id AND 
+    DATEDIFF(o.order_date,now())<60 
+    ORDER BY o.order_date DESC;
+    
+ 
+/*
+Displaying the whole view
+*/ 
+SELECT
+    *
+FROM
+    order_information ;
+
+
+/*
+return the Products(Items) which are in ‘shipped’ state.
+*/
+SELECT
+    *
+FROM
+    order_information oi
+WHERE
+    oi.order_status = 'shipped';
+
+
+
+/*
+return top 4 most selling products.
+*/
+SELECT
+    oi.product_name, count(oi.product_name) AS count
+FROM
+    order_information oi
+GROUP BY oi.product_name
+ORDER BY count DESC
+LIMIT 4;
